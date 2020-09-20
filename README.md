@@ -1,4 +1,4 @@
-# Subswap
+# Subswap 🌊
 
 <p align="center">
   <img src="/docs/media/subswap.jpg" width="300">
