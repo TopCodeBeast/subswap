@@ -37,13 +37,9 @@ Create values with [asset module](./frame/asset/lib.rs)'s `issue` function. User
 
 Create pairs between two assets to exchange. Liquidity providers are rewarded as liquidity provider tokens(a.k.a LP token), and users can claim their rewards by burning it or stake to pools to get SUB, the base currency of subswap protocol. Pairs are developed to create the least impermanent loss 
 
-### $SUB token yield farming
+### yield farming
 
 SUB is the native currency of Subswap network. SUB will be inititally rewarded to liquidity providers who creates cryptocurrency ecosystem. To reward providing liquidity. SUB pools are created to stake lptokens and get SUB. The SUB token is intended to have NO value. There will be NO pre-mine and NO developer fund. We will accomplish this in 3 phases:
-
-1: Chainlink Hackathon testnet (09/25/2020-TBA)
-2: Mainnet incentivization for Live Substrate Networks (Polkadot ($DOT), Kusama ($KSM), Centrifuge ($RAD), Darwinia Crab ($RING & $KTON), Edgeware ($EDG), Kulupu ($KLP), Nodle Main ($NODL), Plasm ($PLM), Stafi ($FIS), Subsocial ($?)
-3: Permissionless community farming - incentive new pools 
 
 ### Democracy
 *For the liquidity providers, By the liquidity providers* 
