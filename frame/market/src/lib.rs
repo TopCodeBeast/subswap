@@ -176,8 +176,8 @@ decl_storage! {
         // Accumulated price data for each pair. key is lptoken identifier
         pub LastAccumulativePrice get(fn last_cumulative_price): map hasher(blake2_128_concat) T::AssetId => (FixedU128, FixedU128);
         pub Reserves get(fn reserves): map hasher(blake2_128_concat) T::AssetId => (<T as balances::Trait>::Balance, <T as balances::Trait>::Balance);
-        pub Pairs get(fn pair): map hasher(blake2_128_concat) T::AssetId => (T::AssetId, T::AssetId);
-        pub LPTokens get(fn lpt): map hasher(blake2_128_concat) (T::AssetId, T::AssetId) => Option<T::AssetId>;
+        pub Rewards get(fn pair): map hasher(blake2_128_concat) T::AssetId => (T::AssetId, T::AssetId);
+        pub Pairs get(fn lpt): map hasher(blake2_128_concat) (T::AssetId, T::AssetId) => Option<T::AssetId>;
     }
 }
 
@@ -217,6 +217,7 @@ decl_error! {
         InsufficientLiquidityMinted,
         InsufficientLiquidityBurned,
         InsufficientOutputAmount,
+        InsufficientAmount,
         K,
     }
 }
@@ -236,27 +237,27 @@ decl_module! {
         // Mint liquidity by adding a liquidity in a pair
         #[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
         pub fn mint_liquidity(origin, token0: T::AssetId, amount0: <T as balances::Trait>::Balance, token1: T::AssetId, amount1: <T as balances::Trait>::Balance) -> dispatch::DispatchResult {
-            let minimum_liquidity = <T as balances::Trait>::Balance::from(1);
+            let minimum_liquidity = <T as balances::Trait>::Balance::from(1000);
             let sender = ensure_signed(origin)?;
 
             // Burn assets from user to deposit to reserves
             asset::Module::<T>::transfer_to_system(&token0, &sender, &amount0)?;
             asset::Module::<T>::transfer_to_system(&token1, &sender, &amount1)?;
-            match LPTokens::<T>::get((&token0, &token1)) {
+            match Pairs::<T>::get((token0.clone(), token1.clone())) {
                 // create pair if lpt does not exist
                 None => {
-                    // Deposit assets to the reserve
-                    <Reserves<T>>::insert(&token0, (amount0, amount1));
                     let mut lptoken_amount: <T as balances::Trait>::Balance = math::sqrt::<T>(amount0 * amount1);
                     lptoken_amount = lptoken_amount.checked_sub(&minimum_liquidity).expect("Integer overflow");
                     // Issue LPtoken
                     asset::Module::<T>::issue_from_system(Zero::zero())?;
                     let mut lptoken_id: T::AssetId = asset::NextAssetId::<T>::get();
                     lptoken_id -= One::one();
+                    // Deposit assets to the reserve
+                    <Reserves<T>>::insert(lptoken, (amount0, amount1));
                     // Mint LPtoken to the sender
                     asset::Module::<T>::mint_from_system(&lptoken_id, &sender, &lptoken_amount)?;
-                    // Insert pair info
-                    <Pairs<T>>::insert(lptoken_id, (token0, token1));
+                    // Insert pair reward info
+                    <Rewards<T>>::insert(lptoken_id, (token0, token1));
                     Self::deposit_event(RawEvent::CreatePair(token0, token1, lptoken_id));
                     Ok(())
                 },
@@ -320,6 +321,12 @@ decl_module! {
         #[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
         pub fn swap(origin, from: T::AssetId, amount: <T as balances::Trait>::Balance, to: T::AssetId) -> dispatch::DispatchResult {
             let sender = ensure_signed(origin)?;
+            // Find pair 
+
+            // get amount out 
+            ensure!(amount > Zero::zero(), Error::<T>::InsufficientAmount);
+            ensure!(reserveIn > Zero::zero() && reserveOut > Zero::zero(), Error::<T>::InsufficientLiquidity);
+        
             Ok(())
         }
     }
@@ -363,5 +370,19 @@ impl<T: Trait> Module<T> {
             ));
         }
         Ok(())
+    }
+
+    fn _add_reserves() {}
+
+    fn _sub_reserves() {}
+
+    fn _get_reserves() {}
+
+
+    pub fn get_amount_out(amountIn: &<T as balances::Trait>::Balance, reserveIn: &<T as balances::Trait>::Balance, reserveOut: &<T as balances::Trait>::Balance) -> <T as balances::Trait>::Balance {
+        let amountInWithFee = amountIn.checked_mul(&T::Balance::from(997)).expect("Multiplication overflow");
+        let numerator = amountInWithFee.checked_mul(reserveOut).expect("Multiplication overflow");
+        let denominator = reserveIn.checked_mul(&T::Balance::from(1000)).expect("Multiplication overflow").checked_add(&amountInWithFee).expect("Overflow");
+        numerator / denominator
     }
 }
