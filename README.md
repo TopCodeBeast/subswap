@@ -8,12 +8,14 @@
 [![Twitter](https://img.shields.io/twitter/follow/SubstrateSwap?label=Follow&style=social)](https://twitter.com/SubstrateSwap)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](docs/CONTRIBUTING.adoc)
 
-Subswap is a permissionless decentralized value exchange protocol which focuses in laying the foundation of the next interoperable cryptoeconomic activities 🚢.
+# Subswap is a permissionless value exchange protocol based on Substrate
+- Automated Market Making (AMM) decentralized exchange (DEX) for Polkadot/Substrate blockchains with fast, low-fee transactions
+- A on-chain treasury to support stability, fund open-source development, vote on protocol upgrades, increase decentralization
+- Fair distribution mechanism of SUB governance tokens that enable community control & evolution of the procotol 
 
-- Fair distribution mechanism of SUB governance tokens that enable community control & evolution of the procotol
-- Experiments in AMM models including Proactive Market Making & Single-Sided Liquidity (DODO), Low Slippage for Similar Stable Assets (Curve/Blackholeswap) & Multi-asset & Dynamicly Weighted pools (Balancer).
-- Orders to optimization across all liquidity pools for best price execution.
-- A governable treasury to further support stability & fund development
+The SUB governance token is focused on laying the foundation of the next generation ofinteroperable cryptoeconomic activities. We (underwater-squad) expect
+- Experiments in AMM models including Proactive Market Making & Single-Sided Liquidity (DODO), low slippage and fees for stable assets (Curve/Blackholeswap) & Multi-asset pools (Balancer)
+- Optimized DEX orders across all liquidity pools for best price execution.
 
 ## Trying it out
 
@@ -35,22 +37,22 @@ Create values with [asset module](./frame/asset/lib.rs)'s `issue` function. User
 
 Create pairs between two assets to exchange. Liquidity providers are rewarded as liquidity provider tokens(a.k.a LP token), and users can claim their rewards by burning it or stake to pools to get SUB, the base currency of subswap protocol. Pairs are developed to create the least impermanent loss 
 
-### Yield farming
+### $SUB token yield farming
 
-SUB is the native currency of Subswap network, and it is not distributed easily. SUB is for liquidity providers and degens who creates cryptocurrency ecosystem. To reward providing liquidity. SUB pools are created to stake lptokens and get SUB. The SUB token is intended to have NO value. There will be NO pre-mine and NO developer fund. We will accomplish this in 3 phases:
+SUB is the native currency of Subswap network. SUB will be inititally rewarded to liquidity providers who creates cryptocurrency ecosystem. To reward providing liquidity. SUB pools are created to stake lptokens and get SUB. The SUB token is intended to have NO value. There will be NO pre-mine and NO developer fund. We will accomplish this in 3 phases:
 
-1: Chainlink Hackathon test net (09/25/2020-
-2: Mainnet incentivization for Live Substrate Networks (Polkadot ($DOT), Kusama ($KSM), Centrifuge ($RAD), Darwinia Crab ($RING & $KTON), Edgeware ($EDG), Kulupu ($KLP), Nodle Main ($NODL), Plasm ($PLM), Stafi ($FIS), Subsocial ($?). 
+1: Chainlink Hackathon testnet (09/25/2020-TBA)
+2: Mainnet incentivization for Live Substrate Networks (Polkadot ($DOT), Kusama ($KSM), Centrifuge ($RAD), Darwinia Crab ($RING & $KTON), Edgeware ($EDG), Kulupu ($KLP), Nodle Main ($NODL), Plasm ($PLM), Stafi ($FIS), Subsocial ($?)
 3: Permissionless community farming - incentive new pools 
 
 ### Democracy
-*For the liquidity providers, By the liquidity providers, of the liquidity providers* 
+*For the liquidity providers, By the liquidity providers* 
 
-SUB is used to determine the future of Subswap protocol. SUB council and holders will usually determine:
-- To issue cryto asset with proven utility
-- To set up exchanges between one asset to the another
-- Set reward rate of SUB pools
-- Add new features (e.g. synthetic assets, derivatives, insurance)
+SUB will determine the future of Subswap protocol. SUB council and holders will determine:
+- Future utility of SUB token 
+- Reward rates of SUB liquidity poolsx
+- Deteremine incentized pools to be rewarded with SUB tokens
+- Fund research for new features (e.g. synthetic assets, derivatives, insurance)
 
 ### Treasury
 
