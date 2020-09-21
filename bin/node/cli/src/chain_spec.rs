@@ -48,12 +48,12 @@ const SUBSWAP_PROPERTIES: &str = r#"
 {
 	"ss58format": 7,
 	"tokenDecimals": 18,
-	"tokenSymbol": "SUNI"
+	"tokenSymbol": "SUB"
 }	
 "#;
 
 
-const SUBSWAP_PROTOCOL_ID: &str = "suni";
+const SUBSWAP_PROTOCOL_ID: &str = "sub";
 
 const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
