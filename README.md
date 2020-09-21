@@ -8,8 +8,12 @@
 [![Twitter](https://img.shields.io/twitter/follow/SubstrateSwap?label=Follow&style=social)](https://twitter.com/SubstrateSwap)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](docs/CONTRIBUTING.adoc)
 
-
 Subswap is a permissionless decentralized value exchange protocol which focuses in laying the foundation of the next interoperable cryptoeconomic activities 🚢.
+
+- Fair distribution mechanism of SUB governance tokens that enable community control & evolution of the procotol
+- Experiments in AMM models including Proactive Market Making & Single-Sided Liquidity (DODO), Low Slippage for Similar Stable Assets (Curve/Blackholeswap) & Multi-asset & Dynamicly Weighted pools (Balancer).
+- Orders to optimization across all liquidity pools for best price execution.
+- A governable treasury to further support stability & fund development
 
 ## Trying it out
 
@@ -29,11 +33,15 @@ Create values with [asset module](./frame/asset/lib.rs)'s `issue` function. User
 
 ### Exchange values
 
-Create pairs between two assets to exchange. Liquidity providers are rewarded as liquidity provider tokens(a.k.a lp token), and users can claim their rewards by burning it or stake to pools to get SUB, the base currency of subswap protocol. Pairs are developed to create the least impermanent loss 
+Create pairs between two assets to exchange. Liquidity providers are rewarded as liquidity provider tokens(a.k.a LP token), and users can claim their rewards by burning it or stake to pools to get SUB, the base currency of subswap protocol. Pairs are developed to create the least impermanent loss 
 
 ### Yield farming
 
-SUB is the native currency of Subswap network, and it is not distributed easily. SUB is for liquidity providers and degens who creates cryptocurrency ecosystem. To reward providing liquidity. SUB pools are created to stake lptokens and get SUB. 
+SUB is the native currency of Subswap network, and it is not distributed easily. SUB is for liquidity providers and degens who creates cryptocurrency ecosystem. To reward providing liquidity. SUB pools are created to stake lptokens and get SUB. The SUB token is intended to have NO value. There will be NO pre-mine and NO developer fund. We will accomplish this in 3 phases:
+
+1: Chainlink Hackathon test net (09/25/2020-
+2: Mainnet incentivization for Live Substrate Networks (Polkadot ($DOT), Kusama ($KSM), Centrifuge ($RAD), Darwinia Crab ($RING & $KTON), Edgeware ($EDG), Kulupu ($KLP), Nodle Main ($NODL), Plasm ($PLM), Stafi ($FIS), Subsocial ($?). 
+3: Permissionless community farming - incentive new pools 
 
 ### Democracy
 *For the liquidity providers, By the liquidity providers, of the liquidity providers* 
