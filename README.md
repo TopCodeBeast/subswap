@@ -19,6 +19,13 @@ To contribute to this project, Simply go to [substrate.dev](https://substrate.de
 [installation](https://substrate.dev/docs/en/knowledgebase/getting-started/) instructions. You can 
 also try out one of the [tutorials](https://substrate.dev/en/tutorials).
 
+For MacOS devs, the current rust nightly compiler crashes so adjust rustc version to compile this project
+```bash
+rustup install nightly-2020-09-11
+rustup default nightly-2020-09-11
+rustup target add wasm32-unknown-unknown
+```
+
 ### For users
 
 Subswap is a permissionless decentralized finance and exchange protocol where holders are rewarded for their activities such as providing liquidity, creating values through decentralization, connecting two different assets with exchanging, and acting in on-chain governance.
