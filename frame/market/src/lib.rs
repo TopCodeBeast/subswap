@@ -136,18 +136,12 @@ use subswap_asset as asset;
 mod math;
 use crate::sp_api_hidden_includes_decl_storage::hidden_include::sp_runtime::traits::*;
 use crate::sp_api_hidden_includes_decl_storage::hidden_include::sp_runtime::FixedPointNumber;
-use crate::sp_api_hidden_includes_decl_storage::hidden_include::traits::StoredMap;
-use codec::{Codec, Decode, Encode};
 
-use core::fmt::Debug;
-use core::num::NonZeroU128;
 /// Edit this file to define custom logic or remove it if it is not needed.
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// https://substrate.dev/docs/en/knowledgebase/runtime/frame
 use frame_support::{
-    decl_error, decl_event, decl_module, decl_storage, dispatch, ensure,
-    traits::{ExistenceRequirement, Get, WithdrawReason},
-    Parameter,
+    decl_error, decl_event, decl_module, decl_storage, dispatch, ensure, traits::Get,
 };
 use frame_system::ensure_signed;
 use pallet_timestamp as timestamp;
@@ -354,7 +348,7 @@ impl<T: Trait> Module<T> {
         reserve0: <T as balances::Trait>::Balance,
         reserve1: <T as balances::Trait>::Balance,
     ) -> bool {
-        let rootK: <T as balances::Trait>::Balance = math::sqrt::<T>(
+        let _rootK: <T as balances::Trait>::Balance = math::sqrt::<T>(
             reserve0
                 .checked_mul(&reserve1)
                 .expect("Multiplicaiton overflow"),
@@ -418,16 +412,16 @@ impl<T: Trait> Module<T> {
         reserve_in: &<T as balances::Trait>::Balance,
         reserve_out: &<T as balances::Trait>::Balance,
     ) -> <T as balances::Trait>::Balance {
-        let amount_inWithFee = amount_in
+        let amount_in_with_fee = amount_in
             .checked_mul(&T::Balance::from(997))
             .expect("Multiplication overflow");
-        let numerator = amount_inWithFee
+        let numerator = amount_in_with_fee
             .checked_mul(reserve_out)
             .expect("Multiplication overflow");
         let denominator = reserve_in
             .checked_mul(&T::Balance::from(1000))
             .expect("Multiplication overflow")
-            .checked_add(&amount_inWithFee)
+            .checked_add(&amount_in_with_fee)
             .expect("Overflow");
         numerator / denominator
     }
