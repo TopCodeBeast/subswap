@@ -133,25 +133,15 @@
 // Ensure we're `no_std` when compiling for Wasm.
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use codec::{Codec, Decode, Encode};
+use crate::sp_api_hidden_includes_decl_storage::hidden_include::traits::Get;
+use crate::sp_api_hidden_includes_decl_storage::hidden_include::traits::StoredMap;
 use frame_support::{
     decl_error, decl_event, decl_module, decl_storage, dispatch, ensure, Parameter,
 };
 use frame_system::ensure_signed;
-use crate::sp_api_hidden_includes_decl_storage::hidden_include::traits::Get;
-use crate::sp_api_hidden_includes_decl_storage::hidden_include::traits::StoredMap;
-use sp_runtime::traits::One;
-use sp_runtime::traits::{AtLeast32Bit, AtLeast32BitUnsigned, Member, StaticLookup, Zero, MaybeSerializeDeserialize};
-use core::fmt::Debug;
 use pallet_balances as balances;
-
-/// Data storage type for each account
-#[derive(Encode, Decode, Clone, Eq, PartialEq)]
-pub enum Account<AccountId> {
-    User(AccountId),
-    System(),
-}
-
+use sp_runtime::traits::One;
+use sp_runtime::traits::{AtLeast32Bit, StaticLookup, Zero};
 
 /// The module configuration trait.
 pub trait Trait: frame_system::Trait + balances::Trait {
@@ -161,7 +151,6 @@ pub trait Trait: frame_system::Trait + balances::Trait {
     /// The arithmetic type of asset identifier.
     type AssetId: Parameter + AtLeast32Bit + Default + Copy;
 }
-
 
 decl_module! {
     pub struct Module<T: Trait> for enum Call where origin: T::Origin {
@@ -182,7 +171,12 @@ decl_module! {
             let origin = ensure_signed(origin)?;
 
             let id = Self::next_asset_id();
-            <NextAssetId<T>>::mutate(|id| *id += One::one());
+            <NextAssetId<T>>::mutate(|id| {
+                if *id == Zero::zero() {
+                    *id += One::one();
+                }
+                *id += One::one();
+            });
 
             <Balances<T>>::insert((id, &origin), total);
             <TotalSupply<T>>::insert(id, total);
@@ -233,7 +227,7 @@ decl_module! {
         ){
             let origin = ensure_signed(origin)?;
             let target = T::Lookup::lookup(target)?;
-            let creator = <Creator<T>>::get(id).unwrap();
+            let creator = <Creator<T>>::get(id);
             ensure!(origin == creator, Error::<T>::NotTheCreator);
             ensure!(!amount.is_zero(), Error::<T>::AmountZero);
 
@@ -333,7 +327,7 @@ decl_storage! {
         ///
         /// TWOX-NOTE: `AssetId` is trusted, so this is safe.
         TotalSupply: map hasher(twox_64_concat) T::AssetId => <T as balances::Trait>::Balance;
-        Creator: map hasher(blake2_128_concat) T::AssetId => Option<T::AccountId>;
+        Creator: map hasher(blake2_128_concat) T::AssetId => T::AccountId;
     }
 }
 
@@ -361,18 +355,17 @@ impl<T: Trait> Module<T> {
             let existential_deposit = T::ExistentialDeposit::get();
             let new_free = <T as balances::Trait>::AccountStore::get(target).free + *amount;
 
-			let wipeout = new_free < existential_deposit;
-			let new_free = if wipeout { Zero::zero() } else { new_free };
-			
-			let free = balances::Module::<T>::mutate_account(target, |account| {
-				
-				account.free = new_free;
-				
-				account.free
-			});
+            let wipeout = new_free < existential_deposit;
+            let new_free = if wipeout { Zero::zero() } else { new_free };
+
+            let _free = balances::Module::<T>::mutate_account(target, |account| {
+                account.free = new_free;
+
+                account.free
+            });
         } else {
             <Balances<T>>::mutate((*id, target), |balance| *balance += *amount);
-            <TotalSupply<T>>::mutate(*id, |supply| *supply += *amount);    
+            <TotalSupply<T>>::mutate(*id, |supply| *supply += *amount);
         }
         Ok(())
     }
@@ -380,7 +373,7 @@ impl<T: Trait> Module<T> {
     pub fn burn_from_system(
         id: &T::AssetId,
         target: &T::AccountId,
-        amount: &T::Balance
+        amount: &T::Balance,
     ) -> dispatch::DispatchResult {
         ensure!(!amount.is_zero(), Error::<T>::AmountZero);
         Self::deposit_event(RawEvent::Burned(*id, target.clone(), *amount));
@@ -388,20 +381,18 @@ impl<T: Trait> Module<T> {
             let existential_deposit = T::ExistentialDeposit::get();
             let new_free = balances::Module::<T>::account(target).free - *amount;
 
-			let wipeout = new_free < existential_deposit;
-			let new_free = if wipeout { Zero::zero() } else { new_free };
-			
-			let free = balances::Module::<T>::mutate_account(target, |account| {
-				
-				account.free = new_free;
-				
-				account.free
-			});
+            let wipeout = new_free < existential_deposit;
+            let new_free = if wipeout { Zero::zero() } else { new_free };
+
+            let _free = balances::Module::<T>::mutate_account(target, |account| {
+                account.free = new_free;
+
+                account.free
+            });
         } else {
             <Balances<T>>::mutate((*id, target), |balance| *balance -= *amount);
-            <TotalSupply<T>>::mutate(*id, |supply| *supply -= *amount);    
+            <TotalSupply<T>>::mutate(*id, |supply| *supply -= *amount);
         }
-        
         Ok(())
     }
 
@@ -416,15 +407,14 @@ impl<T: Trait> Module<T> {
             let existential_deposit = T::ExistentialDeposit::get();
             let new_free = <T as balances::Trait>::AccountStore::get(target).free + *amount;
 
-			let wipeout = new_free < existential_deposit;
-			let new_free = if wipeout { Zero::zero() } else { new_free };
-			
-			let free = balances::Module::<T>::mutate_account(target, |account| {
-				
-				account.free = new_free;
-				
-				account.free
-			});
+            let wipeout = new_free < existential_deposit;
+            let new_free = if wipeout { Zero::zero() } else { new_free };
+
+            let _free = balances::Module::<T>::mutate_account(target, |account| {
+                account.free = new_free;
+
+                account.free
+            });
         } else {
             <Balances<T>>::mutate((*id, target), |balance| *balance += *amount);
         }
@@ -442,15 +432,14 @@ impl<T: Trait> Module<T> {
             let existential_deposit = T::ExistentialDeposit::get();
             let new_free = <T as balances::Trait>::AccountStore::get(target).free - *amount;
 
-			let wipeout = new_free < existential_deposit;
-			let new_free = if wipeout { Zero::zero() } else { new_free };
-			
-			let free = balances::Module::<T>::mutate_account(target, |account| {
-				
-				account.free = new_free;
-				
-				account.free
-			});
+            let wipeout = new_free < existential_deposit;
+            let new_free = if wipeout { Zero::zero() } else { new_free };
+
+            let _free = balances::Module::<T>::mutate_account(target, |account| {
+                account.free = new_free;
+
+                account.free
+            });
         } else {
             <Balances<T>>::mutate((*id, target), |balance| *balance -= *amount);
         }
@@ -459,8 +448,12 @@ impl<T: Trait> Module<T> {
 
     pub fn issue_from_system(total: T::Balance) -> dispatch::DispatchResult {
         let id = Self::next_asset_id();
-        <NextAssetId<T>>::mutate(|id| *id += One::one());
-
+        <NextAssetId<T>>::mutate(|id| {
+            if *id == Zero::zero() {
+                *id += One::one();
+            }
+            *id += One::one();
+        });
         <TotalSupply<T>>::insert(id, total);
 
         Self::deposit_event(RawEvent::IssuedBySystem(id, total));
