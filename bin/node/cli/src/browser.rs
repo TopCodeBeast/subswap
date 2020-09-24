@@ -39,14 +39,14 @@ async fn start_inner(chain_spec: Option<String>, log_level: String) -> Result<Cl
 	let chain_spec = match chain_spec {
 		Some(chain_spec) => ChainSpec::from_json_bytes(chain_spec.as_bytes().to_vec())
 			.map_err(|e| format!("{:?}", e))?,
-		None => crate::chain_spec::development_config()?,
+		None => crate::chain_spec::development_config(),
 	};
 
 	let config = browser_configuration(chain_spec).await?;
 
-	info!("Subswap browser node");
+	info!("Substrate browser node");
 	info!("✌️  version {}", config.impl_version);
-	info!("❤️  by Subswap team with Parity Technologies, 2017-2020");
+	info!("❤️  by Parity Technologies, 2017-2020");
 	info!("📋 Chain specification: {}", config.chain_spec.name());
 	info!("🏷  Node name: {}", config.network.node_name);
 	info!("👤 Role: {:?}", config.role);

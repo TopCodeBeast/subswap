@@ -21,7 +21,6 @@
 use sc_chain_spec::ChainSpecExtension;
 use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 use serde::{Serialize, Deserialize};
-use serde_json;
 use node_runtime::{
 	AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, ContractsConfig, CouncilConfig,
 	DemocracyConfig,GrandpaConfig, ImOnlineConfig, SessionConfig, SessionKeys, StakerStatus,
@@ -43,17 +42,6 @@ pub use node_primitives::{AccountId, Balance, Signature};
 pub use node_runtime::GenesisConfig;
 
 type AccountPublic = <Signature as Verify>::Signer;
-
-const SUBSWAP_PROPERTIES: &str = r#"
-{
-	"ss58format": 7,
-	"tokenDecimals": 18,
-	"tokenSymbol": "SUB"
-}	
-"#;
-
-
-const SUBSWAP_PROTOCOL_ID: &str = "sub";
 
 const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
@@ -167,22 +155,20 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
 }
 
 /// Staging testnet config.
-pub fn staging_testnet_config() -> Result<ChainSpec, String> {
-	let prop_map: serde_json::map::Map<std::string::String, serde_json::value::Value> =
-		serde_json::from_str(SUBSWAP_PROPERTIES).map_err(|err|format!("json err:{}",err))?;
+pub fn staging_testnet_config() -> ChainSpec {
 	let boot_nodes = vec![];
-	Ok(ChainSpec::from_genesis(
-		"Subswap Staging Testnet",
-		"subswap_staging_testnet",
+	ChainSpec::from_genesis(
+		"Staging Testnet",
+		"staging_testnet",
 		ChainType::Live,
 		staging_testnet_config_genesis,
 		boot_nodes,
 		Some(TelemetryEndpoints::new(vec![(STAGING_TELEMETRY_URL.to_string(), 0)])
 			.expect("Staging telemetry url is valid; qed")),
-		Some(SUBSWAP_PROTOCOL_ID),
-		Some(prop_map),
+		None,
+		None,
 		Default::default(),
-	))
+	)
 }
 
 /// Helper function to generate a crypto pair from seed
@@ -345,25 +331,23 @@ fn development_config_genesis() -> GenesisConfig {
 		],
 		get_account_id_from_seed::<sr25519::Public>("Alice"),
 		None,
-		true
+		true,
 	)
 }
 
 /// Development config (single validator Alice)
-pub fn development_config() -> Result<ChainSpec, String> {
-	let prop_map: serde_json::map::Map<std::string::String, serde_json::value::Value> =
-		serde_json::from_str(SUBSWAP_PROPERTIES).map_err(|err|format!("json err:{}",err))?;
-	Ok(ChainSpec::from_genesis(
-		"Subswap Development",
+pub fn development_config() -> ChainSpec {
+	ChainSpec::from_genesis(
+		"Development",
 		"dev",
 		ChainType::Development,
 		development_config_genesis,
 		vec![],
 		None,
-		Some(SUBSWAP_PROTOCOL_ID),
-		Some(prop_map),
+		None,
+		None,
 		Default::default(),
-	))
+	)
 }
 
 fn local_testnet_genesis() -> GenesisConfig {
@@ -373,39 +357,24 @@ fn local_testnet_genesis() -> GenesisConfig {
 			authority_keys_from_seed("Bob"),
 		],
 		get_account_id_from_seed::<sr25519::Public>("Alice"),
-		Some(vec![
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_account_id_from_seed::<sr25519::Public>("Bob"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie"),
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-					get_account_id_from_seed::<sr25519::Public>("Eve"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-				]),
-		true,
+		None,
+		false,
 	)
 }
 
 /// Local testnet config (multivalidator Alice + Bob)
-pub fn local_testnet_config() -> Result<ChainSpec, String> {
-	let prop_map: serde_json::map::Map<std::string::String, serde_json::value::Value> =
-		serde_json::from_str(SUBSWAP_PROPERTIES).map_err(|err|format!("json err:{}",err))?;
-	Ok(ChainSpec::from_genesis(
-		"Subswap Testnet",
-		"subswap_local_testnet",
+pub fn local_testnet_config() -> ChainSpec {
+	ChainSpec::from_genesis(
+		"Local Testnet",
+		"local_testnet",
 		ChainType::Local,
 		local_testnet_genesis,
 		vec![],
 		None,
-		Some(SUBSWAP_PROTOCOL_ID),
-		Some(prop_map),
+		None,
+		None,
 		Default::default(),
-	))
+	)
 }
 
 #[cfg(test)]

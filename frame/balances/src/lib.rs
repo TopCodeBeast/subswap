@@ -599,7 +599,7 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
 	}
 
 	/// Get both the free and reserved balances of an account.
-	pub fn account(who: &T::AccountId) -> AccountData<T::Balance> {
+	fn account(who: &T::AccountId) -> AccountData<T::Balance> {
 		T::AccountStore::get(&who)
 	}
 
@@ -902,7 +902,7 @@ impl<T: Subtrait<I>, I: Instance> frame_system::Trait for ElevatedTrait<T, I> {
 	type MaximumBlockLength = T::MaximumBlockLength;
 	type AvailableBlockRatio = T::AvailableBlockRatio;
 	type Version = T::Version;
-	type ModuleToIndex = T::ModuleToIndex;
+	type PalletInfo = T::PalletInfo;
 	type OnNewAccount = T::OnNewAccount;
 	type OnKilledAccount = T::OnKilledAccount;
 	type AccountData = T::AccountData;
