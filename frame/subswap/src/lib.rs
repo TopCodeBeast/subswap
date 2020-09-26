@@ -295,7 +295,7 @@ decl_module! {
 		// Mint liquidity by adding a liquidity in a pair
         #[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
         pub fn mint_liquidity(origin, token0: T::AssetId, amount0: <T as balances::Trait>::Balance, token1: T::AssetId, amount1: <T as balances::Trait>::Balance) -> dispatch::DispatchResult {
-            let minimum_liquidity = <T as balances::Trait>::Balance::from(1000);
+            let minimum_liquidity = <T as balances::Trait>::Balance::from(1);
             let sender = ensure_signed(origin)?;
             ensure!(token0 != token1, Error::<T>::IdenticalIdentifier);
             // Burn assets from user to deposit to reserves
@@ -314,6 +314,7 @@ decl_module! {
                     Self::_set_reserves(&token0, &token1, &amount0, &amount1, &lptoken_id);
                     // Set pairs for swap lookup
                     Self::_set_pair(&token0, &token1, &lptoken_id);
+                    
                     // Mint LPtoken to the sender
                     Module::<T>::mint_from_system(&lptoken_id, &sender, &lptoken_amount)?;
                     Self::deposit_event(RawEvent::CreatePair(token0, token1, lptoken_id));
@@ -332,7 +333,7 @@ decl_module! {
                     Self::_set_reserves(&token0, &token1, &reserves.0, &reserves.1, &lpt);
                     // Mint LPtoken to the sender
                     Module::<T>::mint_from_system(&lpt, &sender, &lptoken_amount)?;
-                    Self::deposit_event(RawEvent::CreatePair(token0, token1, lpt));
+                    Self::deposit_event(RawEvent::MintedLiquidity(token0, token1, lpt));
                     //Self::_update(&lpt)?;
                     Ok(())
                 },
@@ -347,7 +348,7 @@ decl_module! {
         pub fn burn_liquidity(origin, lpt: T::AssetId, amount: <T as balances::Trait>::Balance) -> dispatch::DispatchResult{
             let sender = ensure_signed(origin)?;
             let mut reserves = Self::reserves(lpt);
-            let tokens = Self::reward(lpt);
+            let tokens = Self::pair(lpt);
             let total_supply = Module::<T>::total_supply(lpt);
 
             // Calculate rewards for providing liquidity with pro-rata distribution
