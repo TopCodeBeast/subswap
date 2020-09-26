@@ -417,8 +417,10 @@ decl_event! {
         IssuedBySystem(AssetId, Balance),
         /// Some assets were transferred. \[asset_id, from, to, amount\]
         Transferred(AssetId, AccountId, AccountId, Balance),
-        TransferredFromSystem(AssetId, Balance),
-        TransferredToSystem(AssetId, Balance),
+        /// Some assets were transferred from system \[asset_id, from, amount\]
+        TransferredFromSystem(AssetId, AccountId, Balance),
+        /// Some assets were transferred to system \[asset_id, to, amount]
+        TransferredToSystem(AssetId, AccountId, Balance),
         /// Some assets were minted. \[asset_id, owner, balance]
         Minted(AssetId, AccountId, Balance),
         /// Some assets were burned. \[asset_id, owner, balance]
@@ -564,7 +566,7 @@ impl<T: Trait> Module<T> {
         amount: &T::Balance,
     ) -> dispatch::DispatchResult {
         ensure!(!amount.is_zero(), Error::<T>::AmountZero);
-        Self::deposit_event(RawEvent::Minted(*id, target.clone(), *amount));
+        Self::deposit_event(RawEvent::TransferredFromSystem(*id, target.clone(), *amount));
         if *id == Zero::zero() {
             let new_free = balances::Module::<T>::free_balance(target) + *amount;
             let _free = balances::Module::<T>::mutate_account(target, |account| {
@@ -584,7 +586,7 @@ impl<T: Trait> Module<T> {
         amount: &T::Balance,
     ) -> dispatch::DispatchResult {
         ensure!(!amount.is_zero(), Error::<T>::AmountZero);
-        Self::deposit_event(RawEvent::Burned(*id, target.clone(), *amount));
+        Self::deposit_event(RawEvent::TransferredToSystem(*id, target.clone(), *amount));
         if *id == Zero::zero() {
             let new_free = balances::Module::<T>::free_balance(target) - *amount;
             let _free = balances::Module::<T>::mutate_account(target, |account| {
