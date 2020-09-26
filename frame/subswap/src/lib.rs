@@ -314,7 +314,7 @@ decl_module! {
                     Self::_set_reserves(&token0, &token1, &amount0, &amount1, &lptoken_id);
                     // Set pairs for swap lookup
                     Self::_set_pair(&token0, &token1, &lptoken_id);
-                    
+                    Self::_set_rewards(&token0, &token1, &lptoken_id);
                     // Mint LPtoken to the sender
                     Module::<T>::mint_from_system(&lptoken_id, &sender, &lptoken_amount)?;
                     Self::deposit_event(RawEvent::CreatePair(token0, token1, lptoken_id));
@@ -348,7 +348,7 @@ decl_module! {
         pub fn burn_liquidity(origin, lpt: T::AssetId, amount: <T as balances::Trait>::Balance) -> dispatch::DispatchResult{
             let sender = ensure_signed(origin)?;
             let mut reserves = Self::reserves(lpt);
-            let tokens = Self::pair(lpt);
+            let tokens = Self::reward(lpt);
             let total_supply = Module::<T>::total_supply(lpt);
 
             // Calculate rewards for providing liquidity with pro-rata distribution
@@ -367,7 +367,6 @@ decl_module! {
             reserves.0 -= reward0;
             reserves.1 -= reward1;
             Self::_set_reserves(&tokens.0, &tokens.1, &reserves.0, &reserves.1, &lpt);
-
             // Deposit event that the liquidity is burned successfully
             Self::deposit_event(RawEvent::BurnedLiquidity(lpt, tokens.0, tokens.1));
             // Update price
@@ -418,6 +417,8 @@ decl_event! {
         IssuedBySystem(AssetId, Balance),
         /// Some assets were transferred. \[asset_id, from, to, amount\]
         Transferred(AssetId, AccountId, AccountId, Balance),
+        TransferredFromSystem(AssetId, Balance),
+        TransferredToSystem(AssetId, Balance),
         /// Some assets were minted. \[asset_id, owner, balance]
         Minted(AssetId, AccountId, Balance),
         /// Some assets were burned. \[asset_id, owner, balance]
@@ -530,7 +531,7 @@ impl<T: Trait> Module<T> {
                 account.free
             });
         } else {
-            <Balances<T>>::mutate((*id, target), |balance| *balance += *amount);
+            <Balances<T>>::mutate((*id, target.clone()), |balance| *balance += *amount);
             <TotalSupply<T>>::mutate(*id, |supply| *supply += *amount);
         }
         Ok(())
@@ -551,7 +552,7 @@ impl<T: Trait> Module<T> {
                 account.free
             });
         } else {
-            <Balances<T>>::mutate((*id, target), |balance| *balance -= *amount);
+            <Balances<T>>::mutate((*id, target.clone()), |balance| *balance -= *amount);
             <TotalSupply<T>>::mutate(*id, |supply| *supply -= *amount);
         }
         Ok(())
@@ -572,7 +573,7 @@ impl<T: Trait> Module<T> {
                 account.free
             });
         } else {
-            <Balances<T>>::mutate((*id, target), |balance| *balance += *amount);
+            <Balances<T>>::mutate((*id, target.clone()), |balance| *balance += *amount);
         }
         Ok(())
     }
@@ -592,7 +593,7 @@ impl<T: Trait> Module<T> {
                 account.free
             });
         } else {
-            <Balances<T>>::mutate((*id, target), |balance| *balance -= *amount);
+            <Balances<T>>::mutate((*id, target.clone()), |balance| *balance -= *amount);
         }
         Ok(())
     }
@@ -624,10 +625,10 @@ impl<T: Trait> Module<T> {
     ) {
         match *token0 > *token1 {
             true => {
-                <Reserves<T>>::insert(lptoken, (amount1, amount0));
+                <Reserves<T>>::insert(*lptoken, (*amount1, *amount0));
             }
             _ => {
-                <Reserves<T>>::insert(lptoken, (amount0, amount1));
+                <Reserves<T>>::insert(*lptoken, (*amount0, *amount1));
             }
         }
     }
@@ -635,7 +636,20 @@ impl<T: Trait> Module<T> {
     fn _set_pair(token0: &T::AssetId, token1: &T::AssetId, lptoken: &T::AssetId) {
         <Pairs<T>>::insert((*token0, *token1), *lptoken);
         <Pairs<T>>::insert((*token1, *token0), *lptoken);
-	}
+    }
+    
+	fn _set_rewards(
+        token0: &T::AssetId, token1: &T::AssetId, lptoken: &T::AssetId
+    ) {
+        match *token0 > *token1 {
+            true => {
+                <Rewards<T>>::insert(*lptoken, (*token1, *token0));
+            }
+            _ => {
+                <Rewards<T>>::insert(*lptoken, (*token0, *token1));
+            }
+        }
+    }
 
 	pub fn _get_amount_out(
         amount_in: &<T as balances::Trait>::Balance,
